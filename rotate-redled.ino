@@ -84,13 +84,13 @@ void loop() {
   //strip.setPixelColor(0, strip.Color(255, 0, 255));
   //strip.show();
   
-  pixelWipe(strip.Color(255, 0, 0),strip.Color(0, 0, 50), 50); // Red
-  
+  pixelWipe(strip.Color(55, 0, 0),strip.Color(0, 0, 15), 30); // Red
+  //pixelWipeReverse(strip.Color(255, 128, 0),strip.Color(0, 0, 50), 50); 
   //colorWipe(strip.Color(255, 0, 0), 50); // Red
   
-  //colorWipe(strip.Color(200, 255, 0), 50); // Green
+  //colorWipe(strip.Color(20, 25, 0), 50); // Green
   
-  //colorWipe(strip.Color(0, 0, 255), 50); // Blue
+  //colorWipe(strip.Color(0, 0, 25), 50); // Blue
   
   //rainbow(20);
   
@@ -121,8 +121,21 @@ void colorWipe(uint32_t c, uint8_t wait) {
 
 void pixelWipe(uint32_t c, uint32_t b, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
+    // Clear all
+    for(uint16_t t=0; t<strip.numPixels(); t++) {
+      strip.setPixelColor(t, b);
+    }
     strip.setPixelColor(i, c);
-    strip.setPixelColor(i - 1, b);
+    strip.show();
+    delay(wait);
+
+  }
+}
+
+void pixelWipeReverse(uint32_t c, uint32_t b, uint8_t wait) {
+  for(uint16_t i=strip.numPixels(); i>0; i--) {
+    strip.setPixelColor(i, c);
+    strip.setPixelColor(i + 1, b);
     strip.show();
     delay(wait);
   }
@@ -153,6 +166,7 @@ void rainbowCycle(uint8_t wait) {
   }
 }
 
+
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
@@ -166,4 +180,3 @@ uint32_t Wheel(byte WheelPos) {
    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
 }
-
