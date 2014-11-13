@@ -46,6 +46,12 @@ const uint8_t gamma[] = {
     182,184,186,188,191,193,195,197,199,202,204,206,209,211,213,215,
     218,220,223,225,227,230,232,235,237,240,242,245,247,250,252,255
 };
+
+//  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+const uint8_t LEDmap[] = {
+    8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7
+};
+
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
 //               note: if not specified, D2 is selected for you.
@@ -75,8 +81,8 @@ uint32_t second_color_weak = strip.Color ( 0,  0,  8);
 uint32_t minute_color      = strip.Color ( 20, 0, 0);
 uint32_t hour_color        = strip.Color (  0, 20,  0);
 
-uint32_t off_color    = strip.Color (  0,  0,  2);
-uint32_t off_color_strong    = strip.Color (  0,  0,  1);
+uint32_t off_color    = strip.Color (  1,  1,  1);
+uint32_t off_color_strong    = strip.Color (  0,  1,  0);
 
 
 /* TODO 0.0 to 1.0 percent between current and next value. for color fading */
@@ -164,7 +170,7 @@ void ClockSegments::draw()
 
 void ClockSegments::add_color (uint8_t position, uint32_t color)
 {
-  uint32_t blended_color = blend (strip.getPixelColor (position), color);
+  uint32_t blended_color = blend (strip.getPixelColor (LEDmap[position]), color);
 
   /* Gamma mapping */
   uint8_t r,b,g;
@@ -173,7 +179,7 @@ void ClockSegments::add_color (uint8_t position, uint32_t color)
   g = (uint8_t)(blended_color >>  8),
   b = (uint8_t)(blended_color >>  0);
 
-  strip.setPixelColor (position, blended_color);
+  strip.setPixelColor (LEDmap[position], blended_color);
 }
 
 
@@ -200,9 +206,9 @@ void ClockSegments::clear ()
 {
   for(uint16_t i=0; i<strip.numPixels (); i++) {
     if ((i == 0) || (i == 3) || (i == 6) || (i == 9)) { 
-      strip.setPixelColor (i, off_color_strong); 
+      strip.setPixelColor (LEDmap[i], off_color_strong); 
     } else {
-    strip.setPixelColor (i, off_color);
+    strip.setPixelColor (LEDmap[i], off_color);
     }
   }
 }
@@ -226,6 +232,10 @@ void setup ()
   strip.begin ();
   strip.show (); // Initialize all pixels to 'off'
   
+  // Dim on board LED
+  RGB.control(true);
+  RGB.color(50, 0, 0);
+  
   request.hostname = "www.timeapi.org";
   request.port = 80;
   request.path = "/utc/now";
@@ -239,40 +249,3 @@ void loop ()
 }
 
 
-
-
-// Fill the dots one after the other with a color
-void colorWipe(uint32_t c, uint32_t wait) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, c);
-      strip.show();
-      delay(wait);
-  }
-}
-
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
-
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-    }
-    strip.show();
-    delay(wait);
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  if(WheelPos < 85) {
-   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-  } else if(WheelPos < 170) {
-   WheelPos -= 85;
-   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  } else {
-   WheelPos -= 170;
-   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-}
