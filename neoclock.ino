@@ -1,9 +1,3 @@
-// This #include statement was automatically added by the Spark IDE.
-#include "HttpClient/HttpClient.h"
-
-// This #include statement was automatically added by the Spark IDE.
-//#include "SparkTime/SparkTime.h"
-
 // extended from time_loop from https://github.com/zeroeth/time_loop 
 #include "application.h"
 
@@ -13,19 +7,6 @@
 #define PIXEL_COUNT 12
 #define PIXEL_PIN A7
 #define PIXEL_TYPE WS2812B
-
-HttpClient http;
-
-// Headers currently need to be set at init, useful for API keys etc.
-http_header_t headers[] = {
-    //  { "Content-Type", "application/json" },
-    //  { "Accept" , "application/json" },
-    { "Accept" , "*/*"},
-    { NULL, NULL } // NOTE: Always terminate headers will NULL
-};
-
-http_request_t request;
-http_response_t response;
 
 // From adaFruit NEOPIXEL goggles example: Gamma correction improves appearance of midrange colors
 const uint8_t gamma[] = {
@@ -83,13 +64,6 @@ uint32_t hour_color        = strip.Color (  0, 20,  0);
 
 uint32_t off_color    = strip.Color (  1,  1,  1);
 uint32_t off_color_strong    = strip.Color (  0,  1,  0);
-
-
-/* TODO 0.0 to 1.0 percent between current and next value. for color fading */
-/* or event based lerping? */
-
-/* TODO gamut values from goggles */
-/* TODO smooth sub pixel rendering of bar/pixel ends (careful to avoid 50% average brightness in middle for a pixel */
 
 
 /* CLOCK */
@@ -214,38 +188,46 @@ void ClockSegments::clear ()
 }
 
 
-
-/* SIMPLE MIXER */
-// add rgb and clamp
-
-
-
-
-
 /* APP */
 ClockPositions positions;
 ClockSegments  segments(strip, positions);
 
 void setup ()
 {
-  Time.zone(+1);
+  Time.zone(+1); // We are in Norway
   strip.begin ();
   strip.show (); // Initialize all pixels to 'off'
   
-  // Dim on board LED
+  // Dim on board LED - it is way too bright
   RGB.control(true);
-  RGB.color(50, 0, 0);
-  
-  request.hostname = "www.timeapi.org";
-  request.port = 80;
-  request.path = "/utc/now";
-}
+  RGB.color(20, 0, 0);
+  }
 
 
 void loop ()
 {
+  // Check if we have summer or winter (normal) DST time
+  if (IsDst(Time.day(), Time.month(), Time.weekday())) {
+    //We ard saving daylight - It is Summertime
+    Time.zone(+2);
+  } else {
+    //We are NOT saving daylight - It is Wintertime and this is the normal
+    Time.zone(+1);
+  }
   positions.update ();
   segments.draw ();
 }
 
+bool IsDst(uint8_t day, uint8_t month, uint8_t dow)
+{
+  if (month < 3 || month > 10)  return false; 
+  if (month > 3 && month < 10)  return true; 
+
+  uint8_t previousSunday = day - dow;
+
+  if (month == 3) return previousSunday >= 25;
+  if (month == 10) return previousSunday < 25;
+
+  return false; // this line never gonna happend
+}
 
