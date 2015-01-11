@@ -13,8 +13,11 @@
 boolean LEDflag = FALSE;
 #define LED D7 // Tiny blue LED onboard
 
-#define BRIGHTNESS  30
-#define FRAMES_PER_SECOND 60
+int BRIGHTNESS = 30;
+int FRAMES_PER_SECOND = 60;
+
+int COOLING = 5;
+int SPARKING = 4;
 
 uint32_t leds[PIXEL_COUNT];
 
@@ -44,18 +47,65 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 void setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
-  strip.setBrightness(BRIGHTNESS);
   pinMode(LED, OUTPUT); // Tiny blue LED onboard
   digitalWrite(LED, LOW);   // Turn Off the LED
+  // expose functions and vars
+  Spark.function("Cool", Cool);
+  Spark.variable("COOLING", &COOLING, INT);
+  Spark.function("Sparks", Sparks);
+  Spark.variable("SPARKING", &SPARKING, INT);
+  Spark.function("Bright", Bright);
+  Spark.variable("BRIGHTNESS", &BRIGHTNESS, INT);
+  Spark.function("Frame", Framerate);
+  Spark.variable("FRAMERATE", &FRAMES_PER_SECOND, INT);
 }
 
 void loop() {
   // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random(1,65500));
+  random16_add_entropy( random(1,65500));  
+  strip.setBrightness(BRIGHTNESS);
+
   Fire2012();
   strip.show();
   delay(1000 / FRAMES_PER_SECOND);
 }
+
+int Cool(String args)
+{
+  String inString = args;
+
+  COOLING = inString.toInt();
+
+  return COOLING;
+}
+
+int Sparks(String args)
+{
+  String inString = args;
+
+  SPARKING = inString.toInt();
+
+  return SPARKING;
+}
+
+int Bright(String args)
+{
+  String inString = args;
+
+  BRIGHTNESS = inString.toInt();
+
+  return BRIGHTNESS;
+}
+
+int Framerate(String args)
+{
+  String inString = args;
+
+  FRAMES_PER_SECOND = inString.toInt();
+
+  return FRAMES_PER_SECOND;
+}
+
 
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
@@ -88,12 +138,12 @@ void loop() {
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
 // Default 55, suggested range 20-100 
-#define COOLING  5
+//#define COOLING  5
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
-#define SPARKING 4
+//#define SPARKING 4
 
 void Fire2012()
 {
