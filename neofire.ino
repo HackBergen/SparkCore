@@ -19,6 +19,8 @@ int FRAMES_PER_SECOND = 60;
 int COOLING = 5;
 int SPARKING = 4;
 
+int tmpInt;
+
 uint32_t leds[PIXEL_COUNT];
 
 // Parameter 1 = number of pixels in strip
@@ -73,8 +75,11 @@ void loop() {
 int Cool(String args)
 {
   String inString = args;
-
-  COOLING = inString.toInt();
+  
+  tmpInt = inString.toInt();
+  if ((tmpInt > 1) && (tmpInt < 100)) {
+      COOLING = tmpInt;
+  }
 
   return COOLING;
 }
@@ -83,7 +88,10 @@ int Sparks(String args)
 {
   String inString = args;
 
-  SPARKING = inString.toInt();
+  tmpInt = inString.toInt();
+  if ((tmpInt > 1) && (tmpInt < 200)) {
+      SPARKING = tmpInt;
+  }
 
   return SPARKING;
 }
@@ -92,7 +100,10 @@ int Bright(String args)
 {
   String inString = args;
 
-  BRIGHTNESS = inString.toInt();
+  tmpInt = inString.toInt();
+  if ((tmpInt > 1) && (tmpInt < 255)) {
+      BRIGHTNESS = tmpInt;
+  }
 
   return BRIGHTNESS;
 }
@@ -101,7 +112,10 @@ int Framerate(String args)
 {
   String inString = args;
 
-  FRAMES_PER_SECOND = inString.toInt();
+  tmpInt = inString.toInt();
+  if ((tmpInt > 10) && (tmpInt < 60)) {
+      FRAMES_PER_SECOND = tmpInt;
+  }
 
   return FRAMES_PER_SECOND;
 }
